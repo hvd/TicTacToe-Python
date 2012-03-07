@@ -16,6 +16,7 @@ moveCount = 0
 #initiate a 2d grid with a sentinal value
 grid = [[sentinal for j in range(3)]for i in range(3)]
 
+gridCopy = [[sentinal for j in range(3)]for i in range(3)]
 def gridify(positions):
 	i=0
 	print " "	
@@ -57,9 +58,27 @@ def letsplay():
 		player2 = 'x';
 	print "You are" + " " +player1
 	print "Computer is" + " " +  player2
+	level = int(raw_input('Choose Opponent level,1 or 2:'))
+	global winner
 	while not winner:
 		playerMove()
-		computerMove()	
+		if(winner):
+				sys.exit()
+		if(level ==1):
+			computerMove()
+			if(winner):
+					sys.exit()	
+		else:
+			pos = aiComputerMove()
+			move[pos] = player2
+			print "Computer plays"
+			time.sleep(2)	
+			gridify(move)
+			print symbol.rjust(23)
+			isWinner(move,grid,pos,True)
+			if(winner):	
+					sys.exit()
+
 
 def playerMove():
 	pos = int(raw_input('Enter a position from 1-9 :'))
@@ -70,7 +89,8 @@ def playerMove():
 		move[pos] = player1
 		gridify(move)
 		print symbol.rjust(23)
-		isWinner(pos)
+		isWinner(move,grid,pos,True)
+
 
 def computerMove():
 	comp_pos = random.randrange(1,9,1)
@@ -80,12 +100,47 @@ def computerMove():
 		time.sleep(2)
 		gridify(move)
 		print symbol.rjust(23)
-		isWinner(comp_pos)		
+		isWinner(move,grid,comp_pos,True)		
 	else:
 		computerMove()
 
-def isWinner(last_move):
-	movesplayed = move.keys()
+def aiComputerMove():
+	#Check for win in next move
+	for i in range(1,10):
+		currentBoardCopy = copyBoard()
+		if i not in move:
+			currentBoardCopy[i] = player2
+			if isWinner(currentBoardCopy,gridCopy,i,False):
+				return i
+	#check if player1 can win in first move
+	for i in range(1,10):
+		currentBoardCopy = copyBoard()
+		if i not in move:
+			currentBoardCopy[i] = player1
+			if isWinner(currentBoardCopy,gridCopy,i,False):
+				print "True"
+				return i
+				
+	#Next check corners if free
+	q = [1,3,7,9]
+	for i in q:
+		if i not in move:
+			return i
+
+	
+	#Check  center if free
+	k = 5
+	if k not in move:
+		return k
+	
+def copyBoard():
+	board = {}
+	for i in move:
+		board[i] = move[i]
+	return board
+	
+def isWinner(onedtable,twodgrid,last_move,printWinner):
+	movesplayed = onedtable.keys()
 	movesplayed.sort()
 	posx=-1
 	posy=-1
@@ -100,55 +155,58 @@ def isWinner(last_move):
 			for j in range(3):
 				ctr = ctr + 1
 				if x == ctr:
-						grid[i][j] = move[x]
+						twodgrid[i][j] = onedtable[x]
 						if x == last_move:
 									posx = i
 									posy = j							
 						set = True
 						break
-	print "Grid is:"	
-	detWinner(posx,posy,move[last_move])
+	
+	return detWinner(posx,posy,onedtable[last_move],printWinner)
 
-def detWinner(x,y,last):
+def detWinner(x,y,last,printWinner):
 		global moveCount
-		moveCount = moveCount + 1
+		#Move the counter only if it is actual move not when ai is trying to predict next move
+		if printWinner:
+			moveCount = moveCount + 1
+		global winner
 		#check column
 		for i in range(3):
 			if grid[x][i] != last:
 						break
 			if(i == 2):
-				print "Winner is " + " " + whoIs(last)	
+				if printWinner:
+					print "Winner is " + " " + whoIs(last)
 				winner = True
-		                sys.exit()
 			#check row	
 		for i in range(3):
 			if grid[i][y] != last:
 						break
 			if(i==2):
-				print "Winner is" + " " +  whoIs(last)
+				if printWinner:
+					print "Winner is" + " " +  whoIs(last)
 				winner = True
-				sys.exit()	
 			#condition that we are on diagonal
 		if x==y:
 			for i in range(3):
 				if grid[i][i] != last:
 							break
 				if(i==2):
-					print "Winner is" + " " + whoIs(last)
+					if printWinner:
+						print "Winner is" + " " + whoIs(last)
 					winner = True
-					sys.exit()
 			#condition that we are on anti diagonal
 		for i in range(3):
 				if grid[i][2-i] != last:
 							break
 				if(i==2):
-					print "Winner is " + " " + whoIs(last)
+					if printWinner:
+						print "Winner is " + " " + whoIs(last)
 					winner = True
-					sys.exit()
 		if (moveCount == 8 ):
 					print "Its a Draw"
 					sys.exit()
-
+		return winner
 
 def whoIs(last):
 	if last == player1:
