@@ -203,7 +203,7 @@ def detWinner(x,y,last,printWinner):
 					if printWinner:
 						print "Winner is " + " " + whoIs(last)
 					winner = True
-		if (moveCount == 8 ):
+		if (moveCount == 9 ) and not (winner):
 					print "Its a Draw"
 					sys.exit()
 		return winner
