@@ -58,7 +58,8 @@ def letsplay():
 		player2 = 'x';
 	print "You are" + " " +player1
 	print "Computer is" + " " +  player2
-	level = int(raw_input('Choose Opponent level,1 or 2:'))
+	level = 1
+	#level = int(raw_input('Choose Opponent level,1 or 2:'))
 	global winner
 	while not winner:
 		playerMove()
